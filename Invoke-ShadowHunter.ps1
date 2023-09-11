@@ -108,10 +108,14 @@ function Invoke-ShadowHunter {
 		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
 		[switch]
 		$AddToTable,
-
+		
 		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
 		[switch]
 		$ForceAdd,
+		
+		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
+		[switch]
+		$NewTargets,
 		
 		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
 		[switch]
@@ -257,6 +261,23 @@ function Invoke-ShadowHunter {
 		break
 	}
 	
+	if($NewTargets){
+		$newtargetstable = $null
+		$newtargetstable = @()
+		$newtargetstable = Get-Table -TableDomain $currentDomain -TableDC $DomainController
+		$newtargetstable = $newtargetstable | Where-Object {
+			$currentTarget = $_.Targets
+			$currentDomain = $_.Domain
+			-not ($table | Where-Object { $_.Targets -eq $currentTarget -and $_.Domain -eq $currentDomain })
+		}
+		$table += $newtargetstable
+		$newKlistDump = klist
+		$newclientLine = $newKlistDump | Where-Object { $_ -match "Client:\s+([^@]+)\s+@" }
+		$newclientName = $Matches[1].Trim()
+		$currclientInfo = $table | Where-Object { $_.Targets -eq $newclientName }
+		$currclientInfo.Recursive = "NO"
+	}
+	
 	if($ShowTable){
 		ShowTable -Feed $table -FunctionBreak
 	}
@@ -395,7 +416,7 @@ function Invoke-ShadowHunter {
 	# Find the target in the table using Select-Object
 	$clientInfo = $null
 	$clientInfo = $table | Where-Object { $_.Targets -eq $clientName }
-
+	
 	if($clientInfo -eq $null){
 		
 		$klistDomain = $null
@@ -1046,7 +1067,7 @@ function AddToTable {
 		}
 		
 		if(!$Domain){
-			Write-Output " [-] Please provide Domain"
+			Write-Output " [-] Please provide Domain name"
 			Write-Output ""
 			break
 		}
@@ -1054,7 +1075,7 @@ function AddToTable {
 		if(!$DomainController){
 			$DomainController = Get-DomainController -trgtdomain $Domain
 			if($DomainController -eq $null){
-				Write-Output " [-] Please provide DomainController"
+				Write-Output " [-] Please provide DomainController info"
 				Write-Output ""
 				break
 			}
