@@ -3,7 +3,7 @@ Automate accounts takeover by abusing GenericWrite/GenericAll rights to add Shad
 
 I'll add usage details soon, in the meantime, please watch the videos below
 
-### Basic Usage:
+### Main Usage:
 
 ```
 iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/Leo4j/Invoke-ShadowHunter/main/Invoke-ShadowHunter.ps1')
