@@ -1046,7 +1046,7 @@ function AddToTable {
 		}
 		
 		if(!$Domain){
-			Write-Output " [-] Please provide Domain name"
+			Write-Output " [-] Please provide Domain"
 			Write-Output ""
 			break
 		}
@@ -1054,7 +1054,7 @@ function AddToTable {
 		if(!$DomainController){
 			$DomainController = Get-DomainController -trgtdomain $Domain
 			if($DomainController -eq $null){
-				Write-Output " [-] Please provide DomainController info"
+				Write-Output " [-] Please provide DomainController"
 				Write-Output ""
 				break
 			}
