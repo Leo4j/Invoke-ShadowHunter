@@ -384,7 +384,35 @@ function Invoke-ShadowHunter {
 	Write-Output ""
 	
 	# Find the target in the table using Select-Object
+	$clientInfo = $null
 	$clientInfo = $table | Where-Object { $_.Targets -eq $clientName }
+
+	if($clientInfo -eq $null){
+		
+		$klistDomain = $null
+		$klistDomain = $KlistDump | Where-Object { $_ -match "Client:.*@\s*([^ ]+)" }
+		$klistDomain = $Matches[1].Trim()
+		$klistDomain = $klistDomain.ToLower()
+		$klistDC = Get-DomainController -trgtdomain $klistDomain
+		
+		$newRow = @{
+			'Domain'          = $klistDomain
+			'Targets'         = $clientName
+			'Compromised'     = 'YES'
+			'Compromised_As'  = $null
+			'DeviceID'        = $null
+			'Cert_Password'   = $null
+			'NT_Hash'         = $null
+			'TGT'             = $null
+			'Recursive'       = 'NO'
+			'DomainController'= $klistDC
+			'Error'           = 'NO'
+		}
+		
+		$table += $newRow
+		
+		$clientInfo = $table | Where-Object { $_.Targets -eq $clientName }
+	}
 
 	if($clientInfo.Recursive -eq "YES"){$LDAPSession.Dispose()}
 	
