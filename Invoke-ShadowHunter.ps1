@@ -108,6 +108,10 @@ function Invoke-ShadowHunter {
 		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
 		[switch]
 		$AddToTable,
+
+		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
+		[switch]
+		$ForceAdd,
 		
 		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
 		[switch]
@@ -243,7 +247,12 @@ function Invoke-ShadowHunter {
 	
 	if($AddToTable){
 		Write-Output ""
-		AddToTable -UserName $UserName -NTHash $NTHash -Ticket $Ticket -table $table -CheckPoint $CheckPoint
+		if($ForceAdd){
+			AddToTable -UserName $UserName -NTHash $NTHash -Ticket $Ticket -table $table -CheckPoint $CheckPoint -Domain $Domain -DomainController $DomainController -ForceAdd
+		}
+		else{
+			AddToTable -UserName $UserName -NTHash $NTHash -Ticket $Ticket -table $table -CheckPoint $CheckPoint -Domain $Domain -DomainController $DomainController
+		}
 		Write-Output ""
 		break
 	}
@@ -1013,13 +1022,62 @@ function AddToTable {
 	
 	param (
 		[array]$table,
+		[switch]$ForceAdd,
 		[string]$UserName,
 		[string]$NTHash,
 		[string]$Ticket,
+		[string]$Domain,
+		[string]$DomainController,
 		[string]$CheckPoint
 	)
 	
+	$TargetClientInfo = $null
+	
 	$TargetClientInfo = $table | Where-Object { $_.Targets -eq $UserName }
+	
+	if($TargetClientInfo -eq $null){
+		
+		if(!$ForceAdd){
+			Write-Output " [-] User $UserName could not be found in the table"
+			Write-Output ""
+			Write-Output " [-] Re-run with -ForceAdd flag to add a new user, and provide also Domain, DomainController info"
+			Write-Output ""
+			break
+		}
+		
+		if(!$Domain){
+			Write-Output " [-] Please provide Domain name"
+			Write-Output ""
+			break
+		}
+		
+		if(!$DomainController){
+			$DomainController = Get-DomainController -trgtdomain $Domain
+			if($DomainController -eq $null){
+				Write-Output " [-] Please provide DomainController info"
+				Write-Output ""
+				break
+			}
+		}
+		
+		$AddnewRow = @{
+			'Domain'          = $Domain
+			'Targets'         = $UserName
+			'Compromised'     = 'NO'
+			'Compromised_As'  = $null
+			'DeviceID'        = $null
+			'Cert_Password'   = $null
+			'NT_Hash'         = $null
+			'TGT'             = $null
+			'Recursive'       = 'NO'
+			'DomainController'= $DomainController
+			'Error'           = 'NO'
+		}
+		
+		$table += $AddnewRow
+		
+		$TargetClientInfo = $table | Where-Object { $_.Targets -eq $UserName }
+	}
 
 	if($NTHash){
 		$TargetClientInfo.NT_Hash = $NTHash
