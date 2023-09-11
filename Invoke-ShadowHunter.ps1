@@ -455,6 +455,14 @@ function Invoke-ShadowHunter {
 						Write-Output "[-] $($target): $WhiskErrorLine"
 					}
 				}
+
+    				elseif($WhiskResults -like '*Error executing the domain searcher*'){
+					if($KeyCredentialError){
+						$Whisklines = $WhiskResults -split "`r`n"
+						$WhiskErrorLine = ($Whisklines | Where-Object { $_ -match "Error executing the domain searcher" }) -replace "\[X\] "
+						Write-Output "[-] $($target): $WhiskErrorLine"
+					}
+				}
 			}
 		}
 		
@@ -672,6 +680,14 @@ function Invoke-ShadowHunter {
 									if($KeyCredentialError){
 										$Whisklines = $WhiskResults -split "`r`n"
 										$WhiskErrorLine = ($Whisklines | Where-Object { $_ -match "Access is denied" }) -replace "\[X\] "
+										Write-Output "[-] $($subtarget): $WhiskErrorLine"
+									}
+								}
+
+ 								elseif($WhiskResults -like '*Error executing the domain searcher*'){
+									if($KeyCredentialError){
+										$Whisklines = $WhiskResults -split "`r`n"
+										$WhiskErrorLine = ($Whisklines | Where-Object { $_ -match "Error executing the domain searcher" }) -replace "\[X\] "
 										Write-Output "[-] $($subtarget): $WhiskErrorLine"
 									}
 								}
