@@ -135,7 +135,11 @@ function Invoke-ShadowHunter {
 		
 		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
 		[switch]
-		$GrabMyHash
+		$GrabMyHash,
+
+		[Parameter (Mandatory=$False, ValueFromPipeline=$true)]
+		[switch]
+		$ShowErrors
 		
 	)
 	
@@ -150,9 +154,10 @@ function Invoke-ShadowHunter {
 	Write-Output "                                                                                                             "
 	Write-Output " [+] Rob LP (@L3o4j) https://github.com/Leo4j"
 
-	
-	$ErrorActionPreference = "SilentlyContinue"
-	$WarningPreference = "SilentlyContinue"
+	if(!$ShowErrors){
+		$ErrorActionPreference = "SilentlyContinue"
+		$WarningPreference = "SilentlyContinue"
+  	}
 	Set-Variable MaximumHistoryCount 32767
 	
 	if($AddToTable){
