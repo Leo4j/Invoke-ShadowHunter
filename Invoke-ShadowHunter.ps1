@@ -1134,7 +1134,7 @@ function AddToTable {
 function Establish-LDAPSession {
 	
 	param (
-		[array]$SessionDomain
+		[string]$SessionDomain
 	)
 	
 	# Define LDAP parameters
