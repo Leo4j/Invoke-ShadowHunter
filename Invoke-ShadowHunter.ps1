@@ -833,6 +833,7 @@ function Get-DomainController {
 
 	# Create a DirectorySearcher object
 	$searcher = New-Object System.DirectoryServices.DirectorySearcher($entry)
+ 	$searcher.PageSize = 1000
 	$searcher.Filter = "(objectClass=domainDNS)"
 	$searcher.PropertiesToLoad.Add("fSMORoleOwner") > $null  # Redirect output to $null to keep the console clean
 
@@ -863,6 +864,7 @@ function Get-ADUsers {
 	$targetdomain = "LDAP://$domainDistinguishedName"
 	$searcher = New-Object System.DirectoryServices.DirectorySearcher
 	$searcher.SearchRoot = New-Object System.DirectoryServices.DirectoryEntry $targetdomain
+ 	$searcher.PageSize = 1000
 	
 	$ldapFilter = "(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
 	$searcher.Filter = $ldapFilter
@@ -907,6 +909,7 @@ function Get-ADComputers {
 	$targetdomain = "LDAP://$domainDistinguishedName"
 	$searcher = New-Object System.DirectoryServices.DirectorySearcher
 	$searcher.SearchRoot = New-Object System.DirectoryServices.DirectoryEntry $targetdomain
+ 	$searcher.PageSize = 1000
 	
 	$ldapFilter = "(objectCategory=computer)"
 	$searcher.Filter = $ldapFilter
